@@ -1,5 +1,4 @@
 import random
-from typing import List
 
 import pandas as pd
 from faker import Faker
@@ -31,9 +30,7 @@ class CreateFilesFake:
         )
         return customers
 
-    def create_products(
-        self, quantity_products: int, categories: List[str]
-    ) -> pd.DataFrame:
+    def create_products(self, quantity_products: int) -> pd.DataFrame:
         """
         Generate a product dataset with random names, categories, and prices.
 
@@ -43,16 +40,46 @@ class CreateFilesFake:
 
         Returns:
             pd.DataFrame: A DataFrame containing the generated product data
+
+        Obs:
+            The maximum possible value for quantity_products is 21,
+            as there are 21 unique category-product combinations.
+
         """
+        product_categories = {
+            "Bebidas": [
+                "Suco de Laranja",
+                "Coca-Cola",
+                "Água Mineral",
+                "Cerveja",
+                "Vinho Tinto",
+            ],
+            "Laticínios": [
+                "Queijo Mussarela",
+                "Leite Integral",
+                "Iogurte Natural",
+                "Manteiga",
+            ],
+            "Carnes": ["Filé de Frango", "Carne Moída", "Picanha", "Linguiça"],
+            "Padaria": ["Pão Francês", "Baguete", "Croissant", "Rosquinha"],
+            "Hortifruti": ["Maçã", "Banana", "Alface", "Tomate", "Cenoura"],
+            "Doces": ["Chocolate", "Bala de Goma", "Brigadeiro", "Pudim", "Sorvete"],
+        }
+        combinations = [
+            (category, product)
+            for category, products in product_categories.items()
+            for product in products
+        ]
+        quantity_products = min(quantity_products, len(combinations))
+        selecteds = random.sample(combinations, k=quantity_products)
+
+        categories_opt, products_opt = zip(*selecteds)
+
         products = pd.DataFrame(
             {
                 "id": range(1, quantity_products + 1),
-                "name": [
-                    self.fake.word().capitalize() for _ in range(quantity_products)
-                ],
-                "category": [
-                    random.choice(categories) for _ in range(quantity_products)
-                ],
+                "name": products_opt,
+                "category": categories_opt,
                 "price": [
                     round(random.uniform(10, 100), 2) for _ in range(quantity_products)
                 ],
